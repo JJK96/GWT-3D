@@ -39,6 +39,8 @@ if __name__ == "__main__":
                         help="Surrounds fuzzable parameters by Burp Intruder characters", action="store_true")
     decode.add_argument("-p", "--pretty", default=False,
                         help="Human readable formatting of the request", action="store_true")
+    decode.add_argument("-j", "--json", default=False,
+                        help="Output request as JSON", action="store_true")
     decode.add_argument("-o", "--output", default="stdout",
                         help="Absolute path were to store all parsed requests (default \"stdout\")", action="store")
     decode.add_argument("-m", "--methods",
@@ -72,8 +74,9 @@ if __name__ == "__main__":
         replace = args.replace
         surround = args.surround
         methods = args.methods
+        json = args.json
 
-        gwt_req_parser = gwt3d.GWTRequest.GWTReq(user_input, output, fuzz, pretty,
+        gwt_req_parser = gwt3d.GWTRequest.GWTReq(user_input, output, fuzz, pretty, json,
                                                  burp, replace, surround, methods, verbose, debug)
         gwt_req_parser.parse()
     else:

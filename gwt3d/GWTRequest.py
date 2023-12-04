@@ -5,10 +5,11 @@ import re
 import sys
 import os.path
 import gwt3d.GWTRequestParser
+import json
 
 
 class GWTReq(object):
-    def __init__(self, user_input, output, fuzz, pretty, burp, replace, surround, methods, verbose, debug):
+    def __init__(self, user_input, output, fuzz, pretty, json, burp, replace, surround, methods, verbose, debug):
         self.user_input = user_input
         self.output = output
         self.fuzz = fuzz
@@ -18,6 +19,7 @@ class GWTReq(object):
         self.surround = surround
         self.verbose = verbose
         self.debug = debug
+        self.json = json
 
         self._parser = gwt3d.GWTRequestParser.GWTReqParser(burp, replace, surround, verbose, debug)
         self._is_pipe_used = True
@@ -65,7 +67,7 @@ class GWTReq(object):
         return method_call['class'] + "." + method_call['method'] + "(" + ", ".join(method_call['params']) + ")"
 
     def _pretty(self, deserialized):
-        pass
+        return json.dumps(deserialized, default=lambda o:o.__dict__)
 
     def _out(self):
         if self.output == "stdout":
@@ -161,16 +163,19 @@ class GWTReq(object):
 
             try:
                 deserialized = self._parser.deserialize(request)
-            except IndexError:
+            except IndexError as e:
                 if not os.name == 'nt':
                     print("\033[4mEncountered Error During Parsing with request:\033[0m\n" + request + "\n")
                 else:
                     print("Encountered Error During Parsing with request:\n" + request + "\n")
+                raise e
             else:
-                if self.pretty is True:
-                    self._pretty(deserialized)
-                else:
-                    if self.fuzz is not True:
+                if self.json is True:
+                    print(self._pretty(deserialized))
+                    return
+                elif self.pretty is True:
+                    print(self._pretty(deserialized))
+                elif self.fuzz is not True:
                         if len(self._methods_lookup) > 0:
                             method_call = self._get_method_and_params(deserialized)
 
@@ -180,6 +185,7 @@ class GWTReq(object):
                                 self._to_display += "Equivalent Java method call:\n"
                             self._to_display += self._method_call_to_string(method_call) + "\n"
 
-                self._fuzz()
+                else:
+                    self._fuzz()
 
         self._out()

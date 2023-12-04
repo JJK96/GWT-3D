@@ -582,7 +582,6 @@ class GWTReqParser(object):
     Parses a value from the string table
     '''
     def _parse_value(self, data_type):
-
         if self._get_typename(data_type) == STRING_OBJECT:
             self._parse_read_string()
         elif self._get_typename(data_type) == INT or data_type == BYTE or data_type == SHORT or data_type == CHAR:
@@ -601,7 +600,7 @@ class GWTReqParser(object):
             self._parse_primitive_array()
         elif self._is_an_object_array(data_type):
             self._parse_object_array()
-        elif self._get_typename(data_type) == BOOLEAN:
+        elif self._get_typename(data_type) == BOOLEAN_OBJECT or self._get_typename(data_type) == BOOLEAN:
             self._parse_read_boolean()
         elif self._is_list_type(data_type):
             self._parse_read_list(data_type)
@@ -662,7 +661,7 @@ class GWTReqParser(object):
             raise IndexError
         else:
             return {"class": self.rpc_deserialized[2], "method": self.rpc_deserialized[3],
-                    "nb": len(self.parameters), "params": [p.values[0] for p in self.parameters]}
+                    "nb": len(self.parameters), "params": self.parameters}
 
     def get_fuzzstr(self):
         return "|".join(self.rpc_list_fuzzable) + "|"
